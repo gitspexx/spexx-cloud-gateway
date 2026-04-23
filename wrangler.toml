@@ -1,0 +1,22 @@
+name = "spexx-cloud-gateway"
+main = "src/index.ts"
+compatibility_date = "2026-04-23"
+
+# Each route below is provisioned by Cloudflare as a Worker custom domain
+# (automatic TLS cert, no orange-cloud proxy required).
+# DNS records must already exist on each zone before deploying.
+
+[[routes]]
+pattern = "api.contentko.com"
+custom_domain = true
+
+[[routes]]
+pattern = "api.kollably.co"
+custom_domain = true
+
+[[routes]]
+pattern = "api.insiderguide.co"
+custom_domain = true
+
+[observability]
+enabled = true
