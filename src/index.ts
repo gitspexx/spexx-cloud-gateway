@@ -22,6 +22,18 @@ const ROUTES: Record<string, string> = {
   "api.contentko.com": "dnehqsalmcbimrdtlpsg.supabase.co",
   "api.kollably.co": "vexgswtiknfbdtqihvjc.supabase.co",
   "api.insiderguide.co": "qbzmsvfphpfgnlztskma.supabase.co",
+  "api.bettercallaxel.com": "ohvehxvexhguuslcqlml.supabase.co",
+};
+
+// Path rewrites for marketing-friendly short paths. Keyed by hostname; the
+// fn returns the rewritten pathname+search or null to use the original.
+const PATH_REWRITES: Record<string, (url: URL) => string | null> = {
+  "api.bettercallaxel.com": (url) => {
+    // /p/<token> → /functions/v1/portal-redirect?t=<token>
+    const m = url.pathname.match(/^\/p\/([A-Za-z0-9]+)\/?$/);
+    if (m) return `/functions/v1/portal-redirect?t=${m[1]}`;
+    return null;
+  },
 };
 
 // Methods that may carry a request body. Others must not set `body` on the
@@ -42,6 +54,17 @@ export default {
     proxyUrl.hostname = target;
     proxyUrl.port = "";
     proxyUrl.protocol = "https:";
+
+    // Apply per-host path rewrite if any matches.
+    const rewriter = PATH_REWRITES[url.hostname.toLowerCase()];
+    if (rewriter) {
+      const rewritten = rewriter(url);
+      if (rewritten) {
+        const ru = new URL(rewritten, proxyUrl.origin);
+        proxyUrl.pathname = ru.pathname;
+        proxyUrl.search = ru.search;
+      }
+    }
 
     // Clone headers; override Host so Supabase's edge routes the request to the
     // correct project. Cloudflare strips hop-by-hop headers automatically.

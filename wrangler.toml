@@ -18,5 +18,9 @@ custom_domain = true
 pattern = "api.insiderguide.co"
 custom_domain = true
 
+[[routes]]
+pattern = "api.bettercallaxel.com"
+custom_domain = true
+
 [observability]
 enabled = true
